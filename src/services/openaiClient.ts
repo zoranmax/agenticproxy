@@ -54,6 +54,10 @@ export class OpenAIClient {
     const url = this.buildUrl(baseUrl, 'models');
     const controller = new AbortController();
 
+    if (cancellationToken?.isCancellationRequested) {
+      throw new Error('Request cancelled');
+    }
+
     const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
 
     let cancelDisposable: vscode.Disposable | undefined;
@@ -110,13 +114,22 @@ export class OpenAIClient {
   public static async testConnection(
     baseUrl: string,
     apiKey?: string,
-    customHeaders?: Record<string, string>
-  ): Promise<{ success: boolean; modelCount: number; error?: string }> {
+    customHeaders?: Record<string, string>,
+    cancellationToken?: vscode.CancellationToken
+  ): Promise<{ success: boolean; modelCount: number; error?: string; cancelled?: boolean }> {
     try {
-      const models = await this.fetchModels(baseUrl, apiKey, customHeaders, undefined, 10000);
+      const models = await this.fetchModels(baseUrl, apiKey, customHeaders, cancellationToken, 10000);
       return { success: true, modelCount: models.length };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
+      // Detect user cancellation via AbortError
+      if (
+        msg.includes('AbortError') ||
+        msg.includes('abort') ||
+        cancellationToken?.isCancellationRequested
+      ) {
+        return { success: false, modelCount: 0, error: msg, cancelled: true };
+      }
       return { success: false, modelCount: 0, error: msg };
     }
   }

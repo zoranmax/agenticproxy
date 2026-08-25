@@ -34,10 +34,14 @@ export class OpenAIChatModelProvider implements vscode.LanguageModelChatProvider
   /**
    * Manual trigger to refresh models across all providers.
    */
-  public async refresh(silent = false): Promise<vscode.LanguageModelChatInformation[]> {
+  public async refresh(
+    silent = false,
+    cancellationToken?: vscode.CancellationToken
+  ): Promise<vscode.LanguageModelChatInformation[]> {
     this.cachedModels = [];
     this._onDidChangeLanguageModelChatInformation.fire();
-    return this.provideLanguageModelChatInformation({ silent }, new vscode.CancellationTokenSource().token);
+    const token = cancellationToken ?? new vscode.CancellationTokenSource().token;
+    return this.provideLanguageModelChatInformation({ silent }, token);
   }
 
   /**

@@ -1,0 +1,19 @@
+# Development files (not shipped in the VSIX)
+.vscode/**
+.vscodeignore
+**/*.ts
+**/*.map
+src/**
+scripts/**
+node_modules/**
+esbuild.js
+eslint.config.js
+Taskfile.yml
+package-lock.json
+.changeset/**
+tsconfig.json
+.gitignore
+.git/**
+**/tsconfig.json
+**/*.d.ts
+**/*.tsbuildinfo

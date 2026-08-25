@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
   context.subscriptions.push(addCmd);
 
-  // 9. Command to configure a provider (edit nickname/URL/API key)
+  // 9. Command to configure a provider (opens the same form used for adding, pre-filled)
   const configureCmd = vscode.commands.registerCommand(
     'agenticproxy.configureProvider',
     async (providerId: string) => {

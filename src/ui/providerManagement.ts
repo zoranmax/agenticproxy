@@ -83,56 +83,47 @@ export class ProviderManagementUI {
    * Flow for adding a new provider.
    */
   public async showAddProviderFlow(): Promise<void> {
-    const result = await showProviderForm('Add Provider');
-
-    if (result.cancelled || !result.nickname || !result.baseUrl) {
-      return;
-    }
-
-    const nickname = result.nickname;
-    const baseUrl = result.baseUrl;
-    const apiKey = result.apiKey;
-
-    // Test connection before saving
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: `Testing connection to ${nickname}...`,
-        cancellable: false
-      },
-      async () => {
-        const testResult = await OpenAIClient.testConnection(baseUrl, apiKey);
-        if (testResult.success) {
-          await this.registry.addProvider(
-            {
-              nickname,
-              baseUrl
-            },
-            apiKey
-          );
-          void vscode.window.showInformationMessage(
-            `Provider "${nickname}" added successfully! Discovered ${testResult.modelCount} model(s).`
-          );
-        } else {
-          const saveAnyway = 'Save Anyway';
-          const choice = await vscode.window.showWarningMessage(
-            `Connection test failed: ${testResult.error}. Would you like to save this provider anyway?`,
-            saveAnyway,
-            'Cancel'
-          );
-          if (choice === saveAnyway) {
-            await this.registry.addProvider(
-              {
-                nickname,
-                baseUrl
-              },
-              apiKey
-            );
-            void vscode.window.showInformationMessage(`Provider "${nickname}" saved.`);
-          }
+    await showProviderForm('Add Provider', undefined, async (data) => {
+      // Test connection before saving
+      const testResult = await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `Testing connection to ${data.nickname}...`,
+          cancellable: true
+        },
+        async (_progress, token) => {
+          return await OpenAIClient.testConnection(data.baseUrl, data.apiKey, undefined, token);
         }
+      );
+
+      if (testResult.cancelled) {
+        return { success: false, error: 'Cancelled' };
       }
-    );
+
+      if (testResult.success) {
+        await this.registry.addProvider(
+          { nickname: data.nickname, baseUrl: data.baseUrl },
+          data.apiKey
+        );
+        return { success: true };
+      }
+
+      const saveAnyway = 'Save Anyway';
+      const choice = await vscode.window.showWarningMessage(
+        `Connection test failed: ${testResult.error}. Would you like to save this provider anyway?`,
+        saveAnyway,
+        'Cancel'
+      );
+      if (choice === saveAnyway) {
+        await this.registry.addProvider(
+          { nickname: data.nickname, baseUrl: data.baseUrl },
+          data.apiKey
+        );
+        return { success: true };
+      }
+
+      return { success: false, error: testResult.error ?? 'Connection failed' };
+    });
   }
 
   /**
@@ -200,22 +191,24 @@ export class ProviderManagementUI {
       nickname: provider.nickname,
       baseUrl: provider.baseUrl,
       apiKey: apiKey ?? ''
+    }, async (data) => {
+      await this.registry.updateProvider(
+        provider.id,
+        { nickname: data.nickname, baseUrl: data.baseUrl },
+        data.apiKey
+      );
+      return { success: true };
     });
 
-    if (result.cancelled || !result.nickname || !result.baseUrl) {
+    if (result.cancelled) {
       return;
     }
 
-    await this.registry.updateProvider(
-      provider.id,
-      {
-        nickname: result.nickname,
-        baseUrl: result.baseUrl
-      },
-      result.apiKey
-    );
-
-    void vscode.window.showInformationMessage(`Updated provider "${result.nickname}".`);
+    if (result.deleted) {
+      await this.registry.deleteProvider(provider.id);
+      void vscode.window.showInformationMessage(`Provider "${provider.nickname}" was removed.`);
+      return;
+    }
   }
 
   public async rotateApiKey(provider: ProviderEntry): Promise<void> {
@@ -318,13 +311,14 @@ export class ProviderManagementUI {
       {
         location: vscode.ProgressLocation.Notification,
         title: `Testing connection to ${provider.nickname}...`,
-        cancellable: false
+        cancellable: true
       },
-      async () => {
+      async (_progress, token) => {
         const result = await OpenAIClient.testConnection(
           provider.baseUrl,
           apiKey,
-          provider.customHeaders
+          provider.customHeaders,
+          token
         );
         if (result.success) {
           void vscode.window.showInformationMessage(
@@ -357,10 +351,10 @@ export class ProviderManagementUI {
       {
         location: vscode.ProgressLocation.Notification,
         title: 'Refreshing models from all providers...',
-        cancellable: false
+        cancellable: true
       },
-      async () => {
-        const models = await this.provider.refresh(true);
+      async (_progress, token) => {
+        const models = await this.provider.refresh(true, token);
         void vscode.window.showInformationMessage(
           `Refreshed models: ${models.length} model(s) available across configured providers.`
         );

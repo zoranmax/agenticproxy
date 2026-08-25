@@ -6,7 +6,7 @@ import { ProviderEntry } from '../types';
    * WebView-based sidebar view for the "AgenticProxy" providers.
  *
  * Unlike a plain tree view, this renders a rich UI with a prominent
- * "Add Provider" button and inline Configure / Delete actions on each
+ * "Add Provider" button and inline ⚙ Configure actions on each
  * provider card.
  */
 export class ProviderSidebarProvider implements vscode.WebviewViewProvider {
@@ -33,8 +33,6 @@ export class ProviderSidebarProvider implements vscode.WebviewViewProvider {
         void vscode.commands.executeCommand('agenticproxy.addProvider');
       } else if (data.type === 'configure' && data.providerId) {
         void vscode.commands.executeCommand('agenticproxy.configureProvider', data.providerId);
-      } else if (data.type === 'delete' && data.providerId) {
-        void vscode.commands.executeCommand('agenticproxy.deleteProvider', data.providerId);
       } else if (data.type === 'refresh') {
         void vscode.commands.executeCommand('agenticproxy.refreshModels');
       }
@@ -96,8 +94,11 @@ export class ProviderSidebarProvider implements vscode.WebviewViewProvider {
           <div class="url">${this.escapeHtml(p.baseUrl)}</div>
           <div class="actions">
             <button class="btn" data-action="toggle-models" data-id="${p.id}">View Models</button>
-            <button class="btn" data-action="configure" data-id="${p.id}">Configure</button>
-            <button class="btn danger" data-action="delete" data-id="${p.id}">Delete</button>
+            <button class="btn icon-btn" data-action="configure" data-id="${p.id}" title="Edit provider settings">
+              <svg class="cog-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
+                <path d="M9.1 4.4L8.6 2H7.4l-.5 2.4-.7.3-2-1.3-.9.8 1.3 2-.2.7-2.4.5v1.2l2.4.5.3.8-1.3 2 .8.8 2-1.3.8.3.4 2.3h1.2l.5-2.4.8-.3 2 1.3.8-.8-1.3-2 .3-.8 2.3-.4V7.4l-2.4-.5-.3-.8 1.3-2-.8-.8-2 1.3-.7-.2zM9.4 1l.5 2.4L12 2.1l2 2-1.4 2.1 2.4.4v2.8l-2.4.5L14 12l-2 2-2.1-1.4-.5 2.4H6.6l-.5-2.4L4 13.9l-2-2 1.4-2.1L1 9.4V6.6l2.4-.5L2.1 4l2-2 2.1 1.4.4-2.4h2.8zm.6 7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM8 7c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1z"/>
+              </svg>
+            </button>
           </div>
           <div class="models" data-id="${p.id}" style="display:none">
             ${modelRows || '<div class="empty-models">No models discovered yet. Click Refresh All Models.</div>'}
@@ -226,10 +227,15 @@ export class ProviderSidebarProvider implements vscode.WebviewViewProvider {
     font-size: 12px;
   }
   .btn:hover { opacity: 0.9; }
-  .btn.danger {
-    background: transparent;
-    color: var(--danger);
-    border-color: var(--danger);
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    width: 28px;
+  }
+  .cog-icon {
+    display: block;
   }
   .empty {
     color: #8a8a8a;
