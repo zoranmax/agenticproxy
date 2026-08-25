@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Monochrome silhouette icon for the activity bar.
+       VS Code tints this with the theme foreground color, so it must be
+       a single-color shape (no gradients, no multi-color fills). -->
+
+  <!-- Plug body -->
+  <rect x="38" y="36" width="52" height="58" rx="8" fill="#ffffff"/>
+
+  <!-- Plug prongs (top) -->
+  <rect x="46" y="16" width="10" height="20" rx="3" fill="#ffffff"/>
+  <rect x="72" y="16" width="10" height="20" rx="3" fill="#ffffff"/>
+
+  <!-- Plug ground prong (bottom) -->
+  <rect x="56" y="94" width="16" height="18" rx="4" fill="#ffffff"/>
+
+  <!-- Cable -->
+  <path d="M 64 112 Q 64 118 40 122" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Connection dots (providers) -->
+  <circle cx="20" cy="64" r="7" fill="#ffffff"/>
+  <circle cx="108" cy="64" r="7" fill="#ffffff"/>
+
+  <!-- Connection lines -->
+  <path d="M 30 64 L 64 64" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 64 64 L 108 64" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg>

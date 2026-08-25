@@ -1,0 +1,86 @@
+# AgenticProxy — Taskfile
+#
+# Usage:
+#   task install      # Install dependencies
+#   task build        # Build (production bundle)
+#   task watch        # Watch for changes and rebuild
+#   task typecheck    # Run TypeScript type checking
+#   task lint         # Run ESLint
+#   task package      # Build + produce a .vsix for the marketplace
+#   task publish      # Publish the extension to the VS Code Marketplace
+#   task clean        # Remove build artifacts
+#
+# Requires: go-task/task (https://taskfile.dev) or the `task` binary.
+
+version: "3"
+
+vars:
+  OUTPUT_DIR: dist
+  VSIX_GLOB: "*.vsix"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  install:
+    desc: Install all dependencies
+    cmds:
+      - npm install
+
+  build:
+    desc: Build the extension bundle (production)
+    cmds:
+      - npm run package
+
+  compile:
+    desc: Compile the extension bundle (development)
+    cmds:
+      - npm run compile
+
+  watch:
+    desc: Watch for changes and rebuild
+    cmds:
+      - npm run watch
+
+  typecheck:
+    desc: Run TypeScript type checking
+    cmds:
+      - npm run typecheck
+
+  lint:
+    desc: Run ESLint on the source
+    cmds:
+      - npm run lint
+
+  check:
+    desc: Run typecheck + lint
+    cmds:
+      - task: typecheck
+      - task: lint
+
+  package:
+    desc: Build and package the extension as a .vsix
+    deps:
+      - build
+    cmds:
+      - npm run vsce:package
+
+  publish:
+    desc: Publish the extension to the VS Code Marketplace (requires login)
+    deps:
+      - build
+    cmds:
+      - npm run vsce:publish
+
+  clean:
+    desc: Remove all generated files (dist, VSIX)
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}
+      - rm -f {{.VSIX_GLOB}}
+
+  dev:
+    desc: Run the extension in a VS Code Extension Development Host (F5)
+    cmds:
+      - echo "Press F5 in VS Code to launch the Extension Development Host."

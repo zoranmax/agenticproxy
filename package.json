@@ -1,0 +1,114 @@
+{
+  "name": "agenticproxy",
+  "displayName": "AgenticProxy",
+  "description": "Register multiple OpenAI-compatible endpoints as chat models in VS Code Chat.",
+  "version": "1.0.0",
+  "publisher": "zoranmax",
+  "license": "MIT",
+  "icon": "media/agenticproxy.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zoranmax/agenticproxy"
+  },
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "openai",
+    "llm",
+    "chat",
+    "model provider",
+    "vllm",
+    "ollama",
+    "openrouter",
+    "deepseek",
+    "agenticproxy"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agenticproxy",
+          "title": "AgenticProxy",
+          "icon": "media/agenticproxy.svg"
+        }
+      ]
+    },
+    "views": {
+      "agenticproxy": [
+        {
+          "id": "agenticproxy.providers",
+          "name": "Providers",
+          "type": "webview",
+          "icon": "media/agenticproxy.svg",
+          "contextualTitle": "AgenticProxy Providers"
+        }
+      ]
+    },
+    "languageModelChatProviders": [
+      {
+        "vendor": "agenticproxy",
+        "displayName": "AgenticProxy",
+        "managementCommand": "agenticproxy.manageProviders"
+      }
+    ],
+    "commands": [
+      {
+        "command": "agenticproxy.manageProviders",
+        "title": "AgenticProxy: Manage Providers",
+        "category": "Chat"
+      },
+      {
+        "command": "agenticproxy.refreshModels",
+        "title": "AgenticProxy: Refresh Models",
+        "category": "Chat"
+      }
+    ],
+    "configuration": {
+      "title": "AgenticProxy",
+      "properties": {
+        "agenticproxy.defaultMaxInputTokens": {
+          "type": "number",
+          "default": 128000,
+          "description": "Default max input tokens fallback for discovered models when not specified."
+        },
+        "agenticproxy.defaultMaxOutputTokens": {
+          "type": "number",
+          "default": 4096,
+          "description": "Default max output tokens fallback for discovered models when not specified."
+        },
+        "agenticproxy.requestTimeoutSeconds": {
+          "type": "number",
+          "default": 60,
+          "description": "Timeout in seconds for model discovery requests."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext ts",
+    "vsce:package": "vsce package --no-dependencies",
+    "vsce:publish": "vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.104.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.23.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.68.0"
+  }
+}
